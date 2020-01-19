@@ -61,6 +61,8 @@ export default class RNPickerSelect extends PureComponent {
         // Custom Icon
         Icon: PropTypes.func,
         InputAccessoryView: PropTypes.func,
+        // Custom TextInput
+        CustomTextInput: PropTypes.func,
     };
 
     static defaultProps = {
@@ -88,6 +90,7 @@ export default class RNPickerSelect extends PureComponent {
         pickerProps: {},
         Icon: null,
         InputAccessoryView: null,
+        CustomTextInput: null,
     };
 
     static handlePlaceholder({ placeholder }) {
@@ -372,8 +375,36 @@ export default class RNPickerSelect extends PureComponent {
         );
     }
 
+    renderCustomTextInput() {
+        const { style, CustomTextInput, textInputProps } = this.props;
+
+        if (!CustomTextInput) {
+            return (
+                <TextInput
+                    style={[
+                        Platform.OS === 'ios' ? style.inputIOS : style.inputAndroid,
+                        this.getPlaceholderStyle(),
+                    ]}
+                    value={this.state.selectedItem.label}
+                    ref={this.setInputRef}
+                    editable={false}
+                    {...textInputProps}
+                />
+            );
+        }
+
+        return (
+            <View testID="custom_text_input_container">
+                <CustomTextInput
+                    selectedItem={this.state.selectedItem}
+                    testID="custom_text_input"
+                />
+            </View>
+        );
+    }
+
     renderTextInputOrChildren() {
-        const { children, style, textInputProps } = this.props;
+        const { children, style } = this.props;
         const containerStyle =
             Platform.OS === 'ios' ? style.inputIOSContainer : style.inputAndroidContainer;
 
@@ -387,16 +418,7 @@ export default class RNPickerSelect extends PureComponent {
 
         return (
             <View pointerEvents="box-only" style={containerStyle}>
-                <TextInput
-                    style={[
-                        Platform.OS === 'ios' ? style.inputIOS : style.inputAndroid,
-                        this.getPlaceholderStyle(),
-                    ]}
-                    value={this.state.selectedItem.label}
-                    ref={this.setInputRef}
-                    editable={false}
-                    {...textInputProps}
-                />
+                {this.renderCustomTextInput()}
                 {this.renderIcon()}
             </View>
         );
